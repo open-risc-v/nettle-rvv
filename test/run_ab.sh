@@ -58,6 +58,13 @@ fi
 mkdir -p "${DATA}"
 shopt -s nullglob
 cases=(test/cases/*.sh)
+# ONLY 可指定只跑某几个用例（空格分隔的 glob/路径）。用于“该包不适用全部用例”的
+# 场景，例如 autotools 类包的侧目录里没有 CMake 编出来的 diff_kernels，
+# 00_framework 那条就自然跑不了，用 ONLY 收窄到真实包用例。
+if [ -n "${ONLY:-}" ]; then
+  # shellcheck disable=SC2206
+  cases=(${ONLY})
+fi
 if [ ${#cases[@]} -eq 0 ]; then
   echo "错误：test/cases/ 下没有用例" >&2
   exit 2
