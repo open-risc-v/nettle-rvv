@@ -30,3 +30,10 @@ perf top（剩余热点，按占比排序）：
 3.
 结论：覆盖度 f=____；停止理由：____
 ```
+
+## 上游接入（Net 环境：autotools 原生构建）
+
+- 之前门禁失败原因：`cmake/upstream.cmake` 是空模板，`tools/nettle-hash` 从未被构建。
+- 新增 `cmake/pkg-build.sh`：两侧各从自己的 `SRC_DIR` 复制一份→必要时 `sh .bootstrap`→`./configure --disable-shared --disable-openssl`→`make install`，并把 `nettle-hash`/`nettle-lfib-stream` 落到 `<build>/tools/`。
+- 结果：`00_framework` + `nettle-hash`（md5/sha1/sha224/sha256/sha384/sha512/sha3_*/sm3/gost/streebog + lfib 流）逐字节一致，A/B **ALL PASS**。
+- 注意：`nettle-lfib-stream` 无出口，用例里必须 `head -c` 截断（历史事故：写出 17GB 把盘写满）。
