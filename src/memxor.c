@@ -38,6 +38,10 @@
 #endif
 
 #include <assert.h>
+
+#if defined(RVV_KERNELS) && defined(__riscv_v)
+#include "riscv/memxor_rvv.h"
+#endif
 #include <limits.h>
 
 #include "memxor.h"
@@ -128,6 +132,14 @@ memxor(void *dst_in, const void *src_in, size_t n)
 {
   unsigned char *dst = dst_in;
   const unsigned char *src = src_in;
+
+#if defined(RVV_KERNELS) && defined(__riscv_v)
+  if (n >= 64)
+    {
+      nettle_memxor_rvv (dst, src, n);
+      return dst;
+    }
+#endif
 
   if (n >= WORD_T_THRESH)
     {
